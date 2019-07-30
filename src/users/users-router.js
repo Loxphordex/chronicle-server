@@ -55,7 +55,30 @@ UsersRouter
       }
     }
 
-    
+    UsersServices.getUserWithUsername(req.app.get('db'), userCreds.username)
+      .then(dbUser => {
+        if (!dbUser) {
+          return res.status(400).json({ error: 'Incorrect username or password' });
+        }
+
+        return UsersServices.comparePasswords(dbUser.password, userCreds.password)
+          .then(match => {
+            if (!match) {
+              res.status(400).json({ error: 'Incorrect username or password' });
+            }
+
+            const subject = dbUser.username;
+            const payload = { user_id: dbUser.id };
+
+            res.send({
+              authToken: UsersServices(subject, payload)
+            });
+          });
+      })
+      .catch(err => {
+        console.error(err);
+        next();
+      });
   });
 
 module.exports = UsersRouter;

@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const xss = require('xss');
+const config = require('../config');
 
 const UsersServices = {
   getById(db, id) {
@@ -9,6 +10,8 @@ const UsersServices = {
       .where('users.id', id)
       .first();
   },
+  //
+  // Registration
   hasUserWithUsername(db, username) {
     return db('users')
       .where({ username })
@@ -33,6 +36,33 @@ const UsersServices = {
       id: user.id,
       username: xss(user.username),
     };
+  },
+  //
+  // Login
+  getUserWithUsername(db, username) {
+    return db('users')
+      .where({ username })
+      .first();
+  },
+  comparePasswords(loginPassword, password) {
+    return bcrypt.compare(loginPassword, password);
+  },
+  createJwt(subject, payload) {
+    return jwt.sign(payload, config.JWT_SECRET, {
+      subject,
+      expiresIn: config.JWT_EXPIRY,
+      algorithms: ['HS256'],
+    });
+  },
+  verifyJwt(token) {
+    return jwt.verify(token, config.JWT_SECRET, {
+      algorithms: ['HS256'],
+    });
+  },
+  parseBasicToken(token) {
+    return Buffer.from(token, 'base64')
+      .toString()
+      .split(':');
   },
 };
 
