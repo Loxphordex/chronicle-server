@@ -7,6 +7,7 @@ const path = require('path');
 UsersRouter
   .route('/register')
   .post(bodyParser, (req, res, next) => {
+    console.log('BODY: ', req.body);
     const { username, password } = req.body;
 
     if (!username) {
@@ -27,7 +28,6 @@ UsersRouter
             const newUser = {
               username,
               password: hashedPassword,
-              date_created: Date.now(),
             };
 
             UsersServices.insertUser(req.app.get('db'), newUser)
