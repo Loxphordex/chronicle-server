@@ -44,14 +44,16 @@ const UsersServices = {
       .where({ username })
       .first();
   },
-  comparePasswords(loginPassword, password) {
-    return bcrypt.compare(loginPassword, password);
+  comparePasswords(loginPassword, hash) {
+    console.log('LOGIN PASSWORD: ', loginPassword);
+    console.log('PASSWORD: ', hash);
+    return bcrypt.compare(loginPassword, hash);
   },
   createJwt(subject, payload) {
     return jwt.sign(payload, config.JWT_SECRET, {
       subject,
       expiresIn: config.JWT_EXPIRY,
-      algorithms: ['HS256'],
+      algorithm: 'HS256',
     });
   },
   verifyJwt(token) {

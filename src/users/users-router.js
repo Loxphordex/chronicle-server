@@ -60,24 +60,23 @@ UsersRouter
         if (!dbUser) {
           return res.status(400).json({ error: 'Incorrect username or password' });
         }
-
-        return UsersServices.comparePasswords(dbUser.password, userCreds.password)
+        return UsersServices.comparePasswords(userCreds.password, dbUser.password)
           .then(match => {
             if (!match) {
-              res.status(400).json({ error: 'Incorrect username or password' });
+              return res.status(400).json({ error: 'Incorrect username or password' });
             }
 
             const subject = dbUser.username;
             const payload = { user_id: dbUser.id };
 
             res.send({
-              authToken: UsersServices(subject, payload)
+              authToken: UsersServices.createJwt(subject, payload)
             });
+          })
+          .catch(err => {
+            console.error(err);
+            next();
           });
-      })
-      .catch(err => {
-        console.error(err);
-        next();
       });
   });
 
